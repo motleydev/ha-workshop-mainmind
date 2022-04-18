@@ -1,0 +1,8 @@
+mutation UpdateGuess($guess_id: uuid!, $result_code: _numeric) {
+  update_user_guess_by_pk(
+    pk_columns: { id: $guess_id }
+    _set: { result_code: $result_code }
+  ) {
+    id
+  }
+}

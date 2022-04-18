@@ -1,0 +1,21 @@
+mutation YouLost($game_id: uuid!, $guess_id: uuid!, $result_code: _numeric) {
+  insert_user_game_one(
+    object: {
+      id: $game_id
+      lost_at: "now()"
+      guesses: {
+        data: { id: $guess_id, result_code: $result_code }
+        on_conflict: {
+          update_columns: [result_code]
+          constraint: user_guess_pkey
+        }
+      }
+    }
+    on_conflict: {
+      constraint: user_game_pkey
+      update_columns: [updated_at, lost_at]
+    }
+  ) {
+    id
+  }
+}

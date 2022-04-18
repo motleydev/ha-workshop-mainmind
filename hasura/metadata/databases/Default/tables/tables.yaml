@@ -1,0 +1,4 @@
+- "!include public_game.yaml"
+- "!include public_user.yaml"
+- "!include public_user_game.yaml"
+- "!include public_user_guess.yaml"

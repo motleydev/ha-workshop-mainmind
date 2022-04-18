@@ -1,0 +1,18 @@
+table:
+  schema: public
+  name: user
+array_relationships:
+  - name: all_guesses
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: user_guess
+  - name: games
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: user_game

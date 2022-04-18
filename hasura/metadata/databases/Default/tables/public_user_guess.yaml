@@ -1,0 +1,27 @@
+table:
+  schema: public
+  name: user_guess
+object_relationships:
+  - name: current_game
+    using:
+      foreign_key_constraint_on: user_game_id
+  - name: user
+    using:
+      foreign_key_constraint_on: user_id
+event_triggers:
+  - name: handle-guess
+    definition:
+      enable_manual: true
+      insert:
+        columns: '*'
+    retry_conf:
+      num_retries: 0
+      interval_sec: 10
+      timeout_sec: 60
+    webhook_from_env: NEXT_URL
+    request_transform:
+      url: '{{$base_url}}/api/events/handle-guess'
+      method: POST
+      version: 2
+      query_params: {}
+      template_engine: Kriti
