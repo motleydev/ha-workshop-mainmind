@@ -1,6 +1,19 @@
-actions: []
+actions:
+  - name: signup
+    definition:
+      kind: synchronous
+      handler: '{{NEXT_URL}}'
+      request_transform:
+        url: '{{$base_url}}/api/actions/createUser'
+        method: POST
+        version: 2
+        query_params: {}
+        template_engine: Kriti
+    permissions:
+      - role: anonymous
 custom_types:
   enums: []
   input_objects: []
-  objects: []
+  objects:
+    - name: SignupOutput
   scalars: []

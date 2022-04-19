@@ -9,3 +9,21 @@ array_relationships:
         table:
           schema: public
           name: user_game
+select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+        - code_complexity
+        - code_length
+        - created_at
+        - game_config
+        - id
+      filter: {}
+  - role: player
+    permission:
+      columns:
+        - code_complexity
+        - code_length
+        - game_config
+        - id
+      filter: {}

@@ -1,0 +1,7 @@
+mutation MakeGuess($input_code: _numeric!, $user_game_id: uuid!) {
+  insert_user_guess_one(
+    object: { input_code: $input_code, user_game_id: $user_game_id }
+  ) {
+    input_code
+  }
+}

@@ -7,7 +7,28 @@ object_relationships:
       foreign_key_constraint_on: user_game_id
   - name: user
     using:
-      foreign_key_constraint_on: user_id
+      foreign_key_constraint_on: user_hash
+insert_permissions:
+  - role: player
+    permission:
+      check: {}
+      set:
+        user_hash: x-hasura-User-Id
+      columns:
+        - input_code
+        - user_game_id
+        - user_hash
+      backend_only: false
+select_permissions:
+  - role: player
+    permission:
+      columns:
+        - input_code
+        - result_code
+        - user_game_id
+      filter:
+        user_hash:
+          _eq: X-Hasura-User-Id
 event_triggers:
   - name: handle-guess
     definition:

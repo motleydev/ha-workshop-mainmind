@@ -7,12 +7,43 @@ object_relationships:
       foreign_key_constraint_on: game_id
   - name: user
     using:
-      foreign_key_constraint_on: user_id
+      foreign_key_constraint_on: user_hash
 array_relationships:
-  - name: guesses
+  - name: user_guesses
     using:
       foreign_key_constraint_on:
         column: user_game_id
         table:
           schema: public
           name: user_guess
+insert_permissions:
+  - role: player
+    permission:
+      check: {}
+      set:
+        user_hash: x-hasura-User-Id
+      columns:
+        - game_id
+      backend_only: false
+select_permissions:
+  - role: player
+    permission:
+      columns:
+        - completed_at
+        - created_at
+        - game_id
+        - id
+        - lost_at
+        - user_hash
+      filter:
+        user_hash:
+          _eq: X-Hasura-User-Id
+      allow_aggregations: true
+update_permissions:
+  - role: player
+    permission:
+      columns: []
+      filter:
+        id:
+          _eq: X-Hasura-User-Id
+      check: null

@@ -9,6 +9,7 @@ generates:
     plugins:
       - "typescript"
       - "typescript-operations"
+      - "typescript-urql"
       - "typescript-document-nodes"
       - "urql-introspection"
     config:

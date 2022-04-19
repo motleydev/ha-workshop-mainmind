@@ -15,17 +15,8 @@ import {
   GetOriginalGameCodeQueryVariables,
 } from "../../../generated/graphql";
 
-import { createClient } from "@urql/core";
+import client from "../_helpers/client";
 import codeCheck from "../_helpers/codeCheck";
-
-const client = createClient({
-  url: "http://localhost:8080/v1/graphql",
-  fetchOptions: () => {
-    return {
-      headers: { "x-hasura-admin-secret": "myadminsecretkey" },
-    };
-  },
-});
 
 type Data = {
   name?: string;
@@ -49,8 +40,8 @@ export default async function handler(
       .toPromise();
 
     const { user_game_by_pk } = data!;
-    const { game, guesses_aggregate } = user_game_by_pk!;
-    const { aggregate } = guesses_aggregate;
+    const { game, user_guesses_aggregate } = user_game_by_pk!;
+    const { aggregate } = user_guesses_aggregate;
     const { count } = aggregate!;
     const { code, code_complexity } = game;
 

@@ -1,6 +1,5 @@
 query GetLatestGame {
   game(limit: 1, order_by: { created_at: asc }) {
-    code
     code_complexity
     code_length
   }

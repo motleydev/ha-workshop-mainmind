@@ -1,9 +1,11 @@
 import gql from 'graphql-tag';
+import * as Urql from 'urql';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -28,6 +30,11 @@ export type Int_Comparison_Exp = {
   _lte?: InputMaybe<Scalars['Int']>;
   _neq?: InputMaybe<Scalars['Int']>;
   _nin?: InputMaybe<Array<Scalars['Int']>>;
+};
+
+export type SignupOutput = {
+  __typename?: 'SignupOutput';
+  token: Scalars['String'];
 };
 
 /** Boolean expression to compare columns of type "String". All fields are combined with logical 'AND'. */
@@ -438,6 +445,7 @@ export type Mutation_Root = {
   insert_user_guess_one?: Maybe<User_Guess>;
   /** insert a single row into the table: "user" */
   insert_user_one?: Maybe<User>;
+  signup?: Maybe<SignupOutput>;
   /** update data of the table: "game" */
   update_game?: Maybe<Game_Mutation_Response>;
   /** update single row of the table: "game" */
@@ -477,7 +485,7 @@ export type Mutation_RootDelete_UserArgs = {
 
 /** mutation root */
 export type Mutation_RootDelete_User_By_PkArgs = {
-  id: Scalars['uuid'];
+  hash: Scalars['String'];
 };
 
 
@@ -715,7 +723,7 @@ export type Query_RootUser_AggregateArgs = {
 
 
 export type Query_RootUser_By_PkArgs = {
-  id: Scalars['uuid'];
+  hash: Scalars['String'];
 };
 
 
@@ -835,7 +843,7 @@ export type Subscription_RootUser_AggregateArgs = {
 
 
 export type Subscription_RootUser_By_PkArgs = {
-  id: Scalars['uuid'];
+  hash: Scalars['String'];
 };
 
 
@@ -900,44 +908,22 @@ export type Timestamptz_Comparison_Exp = {
 /** columns and relationships of "user" */
 export type User = {
   __typename?: 'user';
-  /** An array relationship */
-  all_guesses: Array<User_Guess>;
-  /** An aggregate relationship */
-  all_guesses_aggregate: User_Guess_Aggregate;
   created_at: Scalars['timestamptz'];
-  /** An array relationship */
-  games: Array<User_Game>;
-  /** An aggregate relationship */
-  games_aggregate: User_Game_Aggregate;
-  id: Scalars['uuid'];
-  password: Scalars['String'];
+  hash: Scalars['String'];
   updated_at: Scalars['timestamptz'];
-  username: Scalars['String'];
+  /** An array relationship */
+  user_games: Array<User_Game>;
+  /** An aggregate relationship */
+  user_games_aggregate: User_Game_Aggregate;
+  /** An array relationship */
+  user_guesses: Array<User_Guess>;
+  /** An aggregate relationship */
+  user_guesses_aggregate: User_Guess_Aggregate;
 };
 
 
 /** columns and relationships of "user" */
-export type UserAll_GuessesArgs = {
-  distinct_on?: InputMaybe<Array<User_Guess_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']>;
-  offset?: InputMaybe<Scalars['Int']>;
-  order_by?: InputMaybe<Array<User_Guess_Order_By>>;
-  where?: InputMaybe<User_Guess_Bool_Exp>;
-};
-
-
-/** columns and relationships of "user" */
-export type UserAll_Guesses_AggregateArgs = {
-  distinct_on?: InputMaybe<Array<User_Guess_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']>;
-  offset?: InputMaybe<Scalars['Int']>;
-  order_by?: InputMaybe<Array<User_Guess_Order_By>>;
-  where?: InputMaybe<User_Guess_Bool_Exp>;
-};
-
-
-/** columns and relationships of "user" */
-export type UserGamesArgs = {
+export type UserUser_GamesArgs = {
   distinct_on?: InputMaybe<Array<User_Game_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
@@ -947,12 +933,32 @@ export type UserGamesArgs = {
 
 
 /** columns and relationships of "user" */
-export type UserGames_AggregateArgs = {
+export type UserUser_Games_AggregateArgs = {
   distinct_on?: InputMaybe<Array<User_Game_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
   order_by?: InputMaybe<Array<User_Game_Order_By>>;
   where?: InputMaybe<User_Game_Bool_Exp>;
+};
+
+
+/** columns and relationships of "user" */
+export type UserUser_GuessesArgs = {
+  distinct_on?: InputMaybe<Array<User_Guess_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  order_by?: InputMaybe<Array<User_Guess_Order_By>>;
+  where?: InputMaybe<User_Guess_Bool_Exp>;
+};
+
+
+/** columns and relationships of "user" */
+export type UserUser_Guesses_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<User_Guess_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  order_by?: InputMaybe<Array<User_Guess_Order_By>>;
+  where?: InputMaybe<User_Guess_Bool_Exp>;
 };
 
 /** aggregated selection of "user" */
@@ -982,21 +988,19 @@ export type User_Bool_Exp = {
   _and?: InputMaybe<Array<User_Bool_Exp>>;
   _not?: InputMaybe<User_Bool_Exp>;
   _or?: InputMaybe<Array<User_Bool_Exp>>;
-  all_guesses?: InputMaybe<User_Guess_Bool_Exp>;
   created_at?: InputMaybe<Timestamptz_Comparison_Exp>;
-  games?: InputMaybe<User_Game_Bool_Exp>;
-  id?: InputMaybe<Uuid_Comparison_Exp>;
-  password?: InputMaybe<String_Comparison_Exp>;
+  hash?: InputMaybe<String_Comparison_Exp>;
   updated_at?: InputMaybe<Timestamptz_Comparison_Exp>;
-  username?: InputMaybe<String_Comparison_Exp>;
+  user_games?: InputMaybe<User_Game_Bool_Exp>;
+  user_guesses?: InputMaybe<User_Guess_Bool_Exp>;
 };
 
 /** unique or primary key constraints on table "user" */
 export enum User_Constraint {
   /** unique or primary key constraint */
-  UserPkey = 'user_pkey',
+  UserHashKey = 'user_hash_key',
   /** unique or primary key constraint */
-  UserUsernameKey = 'user_username_key'
+  UserPkey = 'user_pkey'
 }
 
 /** columns and relationships of "user_game" */
@@ -1007,21 +1011,21 @@ export type User_Game = {
   /** An object relationship */
   game: Game;
   game_id: Scalars['uuid'];
-  /** An array relationship */
-  guesses: Array<User_Guess>;
-  /** An aggregate relationship */
-  guesses_aggregate: User_Guess_Aggregate;
   id: Scalars['uuid'];
   lost_at?: Maybe<Scalars['timestamptz']>;
   updated_at: Scalars['timestamptz'];
   /** An object relationship */
   user: User;
-  user_id: Scalars['uuid'];
+  /** An array relationship */
+  user_guesses: Array<User_Guess>;
+  /** An aggregate relationship */
+  user_guesses_aggregate: User_Guess_Aggregate;
+  user_hash: Scalars['String'];
 };
 
 
 /** columns and relationships of "user_game" */
-export type User_GameGuessesArgs = {
+export type User_GameUser_GuessesArgs = {
   distinct_on?: InputMaybe<Array<User_Guess_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
@@ -1031,7 +1035,7 @@ export type User_GameGuessesArgs = {
 
 
 /** columns and relationships of "user_game" */
-export type User_GameGuesses_AggregateArgs = {
+export type User_GameUser_Guesses_AggregateArgs = {
   distinct_on?: InputMaybe<Array<User_Guess_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
@@ -1084,12 +1088,12 @@ export type User_Game_Bool_Exp = {
   created_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   game?: InputMaybe<Game_Bool_Exp>;
   game_id?: InputMaybe<Uuid_Comparison_Exp>;
-  guesses?: InputMaybe<User_Guess_Bool_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   lost_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   updated_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   user?: InputMaybe<User_Bool_Exp>;
-  user_id?: InputMaybe<Uuid_Comparison_Exp>;
+  user_guesses?: InputMaybe<User_Guess_Bool_Exp>;
+  user_hash?: InputMaybe<String_Comparison_Exp>;
 };
 
 /** unique or primary key constraints on table "user_game" */
@@ -1104,12 +1108,12 @@ export type User_Game_Insert_Input = {
   created_at?: InputMaybe<Scalars['timestamptz']>;
   game?: InputMaybe<Game_Obj_Rel_Insert_Input>;
   game_id?: InputMaybe<Scalars['uuid']>;
-  guesses?: InputMaybe<User_Guess_Arr_Rel_Insert_Input>;
   id?: InputMaybe<Scalars['uuid']>;
   lost_at?: InputMaybe<Scalars['timestamptz']>;
   updated_at?: InputMaybe<Scalars['timestamptz']>;
   user?: InputMaybe<User_Obj_Rel_Insert_Input>;
-  user_id?: InputMaybe<Scalars['uuid']>;
+  user_guesses?: InputMaybe<User_Guess_Arr_Rel_Insert_Input>;
+  user_hash?: InputMaybe<Scalars['String']>;
 };
 
 /** aggregate max on columns */
@@ -1121,7 +1125,7 @@ export type User_Game_Max_Fields = {
   id?: Maybe<Scalars['uuid']>;
   lost_at?: Maybe<Scalars['timestamptz']>;
   updated_at?: Maybe<Scalars['timestamptz']>;
-  user_id?: Maybe<Scalars['uuid']>;
+  user_hash?: Maybe<Scalars['String']>;
 };
 
 /** order by max() on columns of table "user_game" */
@@ -1132,7 +1136,7 @@ export type User_Game_Max_Order_By = {
   id?: InputMaybe<Order_By>;
   lost_at?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
-  user_id?: InputMaybe<Order_By>;
+  user_hash?: InputMaybe<Order_By>;
 };
 
 /** aggregate min on columns */
@@ -1144,7 +1148,7 @@ export type User_Game_Min_Fields = {
   id?: Maybe<Scalars['uuid']>;
   lost_at?: Maybe<Scalars['timestamptz']>;
   updated_at?: Maybe<Scalars['timestamptz']>;
-  user_id?: Maybe<Scalars['uuid']>;
+  user_hash?: Maybe<Scalars['String']>;
 };
 
 /** order by min() on columns of table "user_game" */
@@ -1155,7 +1159,7 @@ export type User_Game_Min_Order_By = {
   id?: InputMaybe<Order_By>;
   lost_at?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
-  user_id?: InputMaybe<Order_By>;
+  user_hash?: InputMaybe<Order_By>;
 };
 
 /** response of any mutation on the table "user_game" */
@@ -1187,12 +1191,12 @@ export type User_Game_Order_By = {
   created_at?: InputMaybe<Order_By>;
   game?: InputMaybe<Game_Order_By>;
   game_id?: InputMaybe<Order_By>;
-  guesses_aggregate?: InputMaybe<User_Guess_Aggregate_Order_By>;
   id?: InputMaybe<Order_By>;
   lost_at?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
   user?: InputMaybe<User_Order_By>;
-  user_id?: InputMaybe<Order_By>;
+  user_guesses_aggregate?: InputMaybe<User_Guess_Aggregate_Order_By>;
+  user_hash?: InputMaybe<Order_By>;
 };
 
 /** primary key columns input for table: user_game */
@@ -1215,7 +1219,7 @@ export enum User_Game_Select_Column {
   /** column name */
   UpdatedAt = 'updated_at',
   /** column name */
-  UserId = 'user_id'
+  UserHash = 'user_hash'
 }
 
 /** input type for updating data in table "user_game" */
@@ -1226,7 +1230,7 @@ export type User_Game_Set_Input = {
   id?: InputMaybe<Scalars['uuid']>;
   lost_at?: InputMaybe<Scalars['timestamptz']>;
   updated_at?: InputMaybe<Scalars['timestamptz']>;
-  user_id?: InputMaybe<Scalars['uuid']>;
+  user_hash?: InputMaybe<Scalars['String']>;
 };
 
 /** update columns of table "user_game" */
@@ -1244,7 +1248,7 @@ export enum User_Game_Update_Column {
   /** column name */
   UpdatedAt = 'updated_at',
   /** column name */
-  UserId = 'user_id'
+  UserHash = 'user_hash'
 }
 
 /** columns and relationships of "user_guess" */
@@ -1259,7 +1263,7 @@ export type User_Guess = {
   /** An object relationship */
   user: User;
   user_game_id: Scalars['uuid'];
-  user_id: Scalars['uuid'];
+  user_hash: Scalars['String'];
 };
 
 /** aggregated selection of "user_guess" */
@@ -1310,7 +1314,7 @@ export type User_Guess_Bool_Exp = {
   result_code?: InputMaybe<_Numeric_Comparison_Exp>;
   user?: InputMaybe<User_Bool_Exp>;
   user_game_id?: InputMaybe<Uuid_Comparison_Exp>;
-  user_id?: InputMaybe<Uuid_Comparison_Exp>;
+  user_hash?: InputMaybe<String_Comparison_Exp>;
 };
 
 /** unique or primary key constraints on table "user_guess" */
@@ -1330,7 +1334,7 @@ export type User_Guess_Insert_Input = {
   result_code?: InputMaybe<Scalars['_numeric']>;
   user?: InputMaybe<User_Obj_Rel_Insert_Input>;
   user_game_id?: InputMaybe<Scalars['uuid']>;
-  user_id?: InputMaybe<Scalars['uuid']>;
+  user_hash?: InputMaybe<Scalars['String']>;
 };
 
 /** aggregate max on columns */
@@ -1339,7 +1343,7 @@ export type User_Guess_Max_Fields = {
   created_at?: Maybe<Scalars['timestamptz']>;
   id?: Maybe<Scalars['uuid']>;
   user_game_id?: Maybe<Scalars['uuid']>;
-  user_id?: Maybe<Scalars['uuid']>;
+  user_hash?: Maybe<Scalars['String']>;
 };
 
 /** order by max() on columns of table "user_guess" */
@@ -1347,7 +1351,7 @@ export type User_Guess_Max_Order_By = {
   created_at?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   user_game_id?: InputMaybe<Order_By>;
-  user_id?: InputMaybe<Order_By>;
+  user_hash?: InputMaybe<Order_By>;
 };
 
 /** aggregate min on columns */
@@ -1356,7 +1360,7 @@ export type User_Guess_Min_Fields = {
   created_at?: Maybe<Scalars['timestamptz']>;
   id?: Maybe<Scalars['uuid']>;
   user_game_id?: Maybe<Scalars['uuid']>;
-  user_id?: Maybe<Scalars['uuid']>;
+  user_hash?: Maybe<Scalars['String']>;
 };
 
 /** order by min() on columns of table "user_guess" */
@@ -1364,7 +1368,7 @@ export type User_Guess_Min_Order_By = {
   created_at?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   user_game_id?: InputMaybe<Order_By>;
-  user_id?: InputMaybe<Order_By>;
+  user_hash?: InputMaybe<Order_By>;
 };
 
 /** response of any mutation on the table "user_guess" */
@@ -1392,7 +1396,7 @@ export type User_Guess_Order_By = {
   result_code?: InputMaybe<Order_By>;
   user?: InputMaybe<User_Order_By>;
   user_game_id?: InputMaybe<Order_By>;
-  user_id?: InputMaybe<Order_By>;
+  user_hash?: InputMaybe<Order_By>;
 };
 
 /** primary key columns input for table: user_guess */
@@ -1413,7 +1417,7 @@ export enum User_Guess_Select_Column {
   /** column name */
   UserGameId = 'user_game_id',
   /** column name */
-  UserId = 'user_id'
+  UserHash = 'user_hash'
 }
 
 /** input type for updating data in table "user_guess" */
@@ -1423,7 +1427,7 @@ export type User_Guess_Set_Input = {
   input_code?: InputMaybe<Scalars['_numeric']>;
   result_code?: InputMaybe<Scalars['_numeric']>;
   user_game_id?: InputMaybe<Scalars['uuid']>;
-  user_id?: InputMaybe<Scalars['uuid']>;
+  user_hash?: InputMaybe<Scalars['String']>;
 };
 
 /** update columns of table "user_guess" */
@@ -1439,38 +1443,32 @@ export enum User_Guess_Update_Column {
   /** column name */
   UserGameId = 'user_game_id',
   /** column name */
-  UserId = 'user_id'
+  UserHash = 'user_hash'
 }
 
 /** input type for inserting data into table "user" */
 export type User_Insert_Input = {
-  all_guesses?: InputMaybe<User_Guess_Arr_Rel_Insert_Input>;
   created_at?: InputMaybe<Scalars['timestamptz']>;
-  games?: InputMaybe<User_Game_Arr_Rel_Insert_Input>;
-  id?: InputMaybe<Scalars['uuid']>;
-  password?: InputMaybe<Scalars['String']>;
+  hash?: InputMaybe<Scalars['String']>;
   updated_at?: InputMaybe<Scalars['timestamptz']>;
-  username?: InputMaybe<Scalars['String']>;
+  user_games?: InputMaybe<User_Game_Arr_Rel_Insert_Input>;
+  user_guesses?: InputMaybe<User_Guess_Arr_Rel_Insert_Input>;
 };
 
 /** aggregate max on columns */
 export type User_Max_Fields = {
   __typename?: 'user_max_fields';
   created_at?: Maybe<Scalars['timestamptz']>;
-  id?: Maybe<Scalars['uuid']>;
-  password?: Maybe<Scalars['String']>;
+  hash?: Maybe<Scalars['String']>;
   updated_at?: Maybe<Scalars['timestamptz']>;
-  username?: Maybe<Scalars['String']>;
 };
 
 /** aggregate min on columns */
 export type User_Min_Fields = {
   __typename?: 'user_min_fields';
   created_at?: Maybe<Scalars['timestamptz']>;
-  id?: Maybe<Scalars['uuid']>;
-  password?: Maybe<Scalars['String']>;
+  hash?: Maybe<Scalars['String']>;
   updated_at?: Maybe<Scalars['timestamptz']>;
-  username?: Maybe<Scalars['String']>;
 };
 
 /** response of any mutation on the table "user" */
@@ -1498,18 +1496,16 @@ export type User_On_Conflict = {
 
 /** Ordering options when selecting data from "user". */
 export type User_Order_By = {
-  all_guesses_aggregate?: InputMaybe<User_Guess_Aggregate_Order_By>;
   created_at?: InputMaybe<Order_By>;
-  games_aggregate?: InputMaybe<User_Game_Aggregate_Order_By>;
-  id?: InputMaybe<Order_By>;
-  password?: InputMaybe<Order_By>;
+  hash?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
-  username?: InputMaybe<Order_By>;
+  user_games_aggregate?: InputMaybe<User_Game_Aggregate_Order_By>;
+  user_guesses_aggregate?: InputMaybe<User_Guess_Aggregate_Order_By>;
 };
 
 /** primary key columns input for table: user */
 export type User_Pk_Columns_Input = {
-  id: Scalars['uuid'];
+  hash: Scalars['String'];
 };
 
 /** select columns of table "user" */
@@ -1517,22 +1513,16 @@ export enum User_Select_Column {
   /** column name */
   CreatedAt = 'created_at',
   /** column name */
-  Id = 'id',
+  Hash = 'hash',
   /** column name */
-  Password = 'password',
-  /** column name */
-  UpdatedAt = 'updated_at',
-  /** column name */
-  Username = 'username'
+  UpdatedAt = 'updated_at'
 }
 
 /** input type for updating data in table "user" */
 export type User_Set_Input = {
   created_at?: InputMaybe<Scalars['timestamptz']>;
-  id?: InputMaybe<Scalars['uuid']>;
-  password?: InputMaybe<Scalars['String']>;
+  hash?: InputMaybe<Scalars['String']>;
   updated_at?: InputMaybe<Scalars['timestamptz']>;
-  username?: InputMaybe<Scalars['String']>;
 };
 
 /** update columns of table "user" */
@@ -1540,13 +1530,9 @@ export enum User_Update_Column {
   /** column name */
   CreatedAt = 'created_at',
   /** column name */
-  Id = 'id',
+  Hash = 'hash',
   /** column name */
-  Password = 'password',
-  /** column name */
-  UpdatedAt = 'updated_at',
-  /** column name */
-  Username = 'username'
+  UpdatedAt = 'updated_at'
 }
 
 /** Boolean expression to compare columns of type "uuid". All fields are combined with logical 'AND'. */
@@ -1562,12 +1548,51 @@ export type Uuid_Comparison_Exp = {
   _nin?: InputMaybe<Array<Scalars['uuid']>>;
 };
 
+export type CreateGameMutationVariables = Exact<{
+  game_id: Scalars['uuid'];
+}>;
+
+
+export type CreateGameMutation = { __typename?: 'mutation_root', insert_user_game_one?: { __typename?: 'user_game', game_id: any } | null };
+
+export type CreateUserMutationVariables = Exact<{
+  hash?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type CreateUserMutation = { __typename?: 'mutation_root', insert_user_one?: { __typename?: 'user', hash: string } | null };
+
+export type GameDetailsSubscriptionVariables = Exact<{
+  id: Scalars['uuid'];
+}>;
+
+
+export type GameDetailsSubscription = { __typename?: 'subscription_root', user_game_by_pk?: { __typename?: 'user_game', lost_at?: any | null, completed_at?: any | null, user_guesses: Array<{ __typename?: 'user_guess', input_code: any, result_code?: any | null }> } | null };
+
 export type GetOriginalGameCodeQueryVariables = Exact<{
   id: Scalars['uuid'];
 }>;
 
 
-export type GetOriginalGameCodeQuery = { __typename?: 'query_root', user_game_by_pk?: { __typename?: 'user_game', guesses_aggregate: { __typename?: 'user_guess_aggregate', aggregate?: { __typename?: 'user_guess_aggregate_fields', count: number } | null }, game: { __typename?: 'game', code_complexity: number, code: any } } | null };
+export type GetOriginalGameCodeQuery = { __typename?: 'query_root', user_game_by_pk?: { __typename?: 'user_game', user_guesses_aggregate: { __typename?: 'user_guess_aggregate', aggregate?: { __typename?: 'user_guess_aggregate_fields', count: number } | null }, game: { __typename?: 'game', code_complexity: number, code: any } } | null };
+
+export type GetLatestGameQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetLatestGameQuery = { __typename?: 'query_root', game: Array<{ __typename?: 'game', code_complexity: number, code_length: number }> };
+
+export type MakeGuessMutationVariables = Exact<{
+  input_code: Scalars['_numeric'];
+  user_game_id: Scalars['uuid'];
+}>;
+
+
+export type MakeGuessMutation = { __typename?: 'mutation_root', insert_user_guess_one?: { __typename?: 'user_guess', input_code: any } | null };
+
+export type SignupMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SignupMutation = { __typename?: 'mutation_root', signup?: { __typename?: 'SignupOutput', token: string } | null };
 
 export type UpdateGuessMutationVariables = Exact<{
   guess_id: Scalars['uuid'];
@@ -1596,10 +1621,51 @@ export type YouWonMutationVariables = Exact<{
 export type YouWonMutation = { __typename?: 'mutation_root', insert_user_game_one?: { __typename?: 'user_game', id: any } | null };
 
 
-export const GetOriginalGameCode = gql`
+export const CreateGameDocument = gql`
+    mutation CreateGame($game_id: uuid!) {
+  insert_user_game_one(
+    object: {game_id: $game_id}
+    on_conflict: {constraint: user_game_pkey}
+  ) {
+    game_id
+  }
+}
+    `;
+
+export function useCreateGameMutation() {
+  return Urql.useMutation<CreateGameMutation, CreateGameMutationVariables>(CreateGameDocument);
+};
+export const CreateUserDocument = gql`
+    mutation CreateUser($hash: String) {
+  insert_user_one(object: {hash: $hash}) {
+    hash
+  }
+}
+    `;
+
+export function useCreateUserMutation() {
+  return Urql.useMutation<CreateUserMutation, CreateUserMutationVariables>(CreateUserDocument);
+};
+export const GameDetailsDocument = gql`
+    subscription GameDetails($id: uuid!) {
+  user_game_by_pk(id: $id) {
+    lost_at
+    completed_at
+    user_guesses {
+      input_code
+      result_code
+    }
+  }
+}
+    `;
+
+export function useGameDetailsSubscription<TData = GameDetailsSubscription>(options: Omit<Urql.UseSubscriptionArgs<GameDetailsSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<GameDetailsSubscription, TData>) {
+  return Urql.useSubscription<GameDetailsSubscription, TData, GameDetailsSubscriptionVariables>({ query: GameDetailsDocument, ...options }, handler);
+};
+export const GetOriginalGameCodeDocument = gql`
     query GetOriginalGameCode($id: uuid!) {
   user_game_by_pk(id: $id) {
-    guesses_aggregate {
+    user_guesses_aggregate {
       aggregate {
         count
       }
@@ -1608,6 +1674,157 @@ export const GetOriginalGameCode = gql`
       code_complexity
       code
     }
+  }
+}
+    `;
+
+export function useGetOriginalGameCodeQuery(options: Omit<Urql.UseQueryArgs<GetOriginalGameCodeQueryVariables>, 'query'>) {
+  return Urql.useQuery<GetOriginalGameCodeQuery>({ query: GetOriginalGameCodeDocument, ...options });
+};
+export const GetLatestGameDocument = gql`
+    query GetLatestGame {
+  game(limit: 1, order_by: {created_at: asc}) {
+    code_complexity
+    code_length
+  }
+}
+    `;
+
+export function useGetLatestGameQuery(options?: Omit<Urql.UseQueryArgs<GetLatestGameQueryVariables>, 'query'>) {
+  return Urql.useQuery<GetLatestGameQuery>({ query: GetLatestGameDocument, ...options });
+};
+export const MakeGuessDocument = gql`
+    mutation MakeGuess($input_code: _numeric!, $user_game_id: uuid!) {
+  insert_user_guess_one(
+    object: {input_code: $input_code, user_game_id: $user_game_id}
+  ) {
+    input_code
+  }
+}
+    `;
+
+export function useMakeGuessMutation() {
+  return Urql.useMutation<MakeGuessMutation, MakeGuessMutationVariables>(MakeGuessDocument);
+};
+export const SignupDocument = gql`
+    mutation Signup {
+  signup {
+    token
+  }
+}
+    `;
+
+export function useSignupMutation() {
+  return Urql.useMutation<SignupMutation, SignupMutationVariables>(SignupDocument);
+};
+export const UpdateGuessDocument = gql`
+    mutation UpdateGuess($guess_id: uuid!, $result_code: _numeric) {
+  update_user_guess_by_pk(
+    pk_columns: {id: $guess_id}
+    _set: {result_code: $result_code}
+  ) {
+    id
+  }
+}
+    `;
+
+export function useUpdateGuessMutation() {
+  return Urql.useMutation<UpdateGuessMutation, UpdateGuessMutationVariables>(UpdateGuessDocument);
+};
+export const YouLostDocument = gql`
+    mutation YouLost($game_id: uuid!, $guess_id: uuid!, $result_code: _numeric) {
+  insert_user_game_one(
+    object: {id: $game_id, lost_at: "now()", user_guesses: {data: {id: $guess_id, result_code: $result_code}, on_conflict: {update_columns: [result_code], constraint: user_guess_pkey}}}
+    on_conflict: {constraint: user_game_pkey, update_columns: [updated_at, lost_at]}
+  ) {
+    id
+  }
+}
+    `;
+
+export function useYouLostMutation() {
+  return Urql.useMutation<YouLostMutation, YouLostMutationVariables>(YouLostDocument);
+};
+export const YouWonDocument = gql`
+    mutation YouWon($game_id: uuid!, $guess_id: uuid!, $result_code: _numeric) {
+  insert_user_game_one(
+    object: {id: $game_id, completed_at: "now()", user_guesses: {data: {id: $guess_id, result_code: $result_code}, on_conflict: {update_columns: [result_code], constraint: user_guess_pkey}}}
+    on_conflict: {constraint: user_game_pkey, update_columns: [updated_at, completed_at]}
+  ) {
+    id
+  }
+}
+    `;
+
+export function useYouWonMutation() {
+  return Urql.useMutation<YouWonMutation, YouWonMutationVariables>(YouWonDocument);
+};
+
+export const CreateGame = gql`
+    mutation CreateGame($game_id: uuid!) {
+  insert_user_game_one(
+    object: {game_id: $game_id}
+    on_conflict: {constraint: user_game_pkey}
+  ) {
+    game_id
+  }
+}
+    `;
+export const CreateUser = gql`
+    mutation CreateUser($hash: String) {
+  insert_user_one(object: {hash: $hash}) {
+    hash
+  }
+}
+    `;
+export const GameDetails = gql`
+    subscription GameDetails($id: uuid!) {
+  user_game_by_pk(id: $id) {
+    lost_at
+    completed_at
+    user_guesses {
+      input_code
+      result_code
+    }
+  }
+}
+    `;
+export const GetOriginalGameCode = gql`
+    query GetOriginalGameCode($id: uuid!) {
+  user_game_by_pk(id: $id) {
+    user_guesses_aggregate {
+      aggregate {
+        count
+      }
+    }
+    game {
+      code_complexity
+      code
+    }
+  }
+}
+    `;
+export const GetLatestGame = gql`
+    query GetLatestGame {
+  game(limit: 1, order_by: {created_at: asc}) {
+    code_complexity
+    code_length
+  }
+}
+    `;
+export const MakeGuess = gql`
+    mutation MakeGuess($input_code: _numeric!, $user_game_id: uuid!) {
+  insert_user_guess_one(
+    object: {input_code: $input_code, user_game_id: $user_game_id}
+  ) {
+    input_code
+  }
+}
+    `;
+export const Signup = gql`
+    mutation Signup {
+  signup {
+    token
   }
 }
     `;
@@ -1624,7 +1841,7 @@ export const UpdateGuess = gql`
 export const YouLost = gql`
     mutation YouLost($game_id: uuid!, $guess_id: uuid!, $result_code: _numeric) {
   insert_user_game_one(
-    object: {id: $game_id, lost_at: "now()", guesses: {data: {id: $guess_id, result_code: $result_code}, on_conflict: {update_columns: [result_code], constraint: user_guess_pkey}}}
+    object: {id: $game_id, lost_at: "now()", user_guesses: {data: {id: $guess_id, result_code: $result_code}, on_conflict: {update_columns: [result_code], constraint: user_guess_pkey}}}
     on_conflict: {constraint: user_game_pkey, update_columns: [updated_at, lost_at]}
   ) {
     id
@@ -1634,7 +1851,7 @@ export const YouLost = gql`
 export const YouWon = gql`
     mutation YouWon($game_id: uuid!, $guess_id: uuid!, $result_code: _numeric) {
   insert_user_game_one(
-    object: {id: $game_id, completed_at: "now()", guesses: {data: {id: $guess_id, result_code: $result_code}, on_conflict: {update_columns: [result_code], constraint: user_guess_pkey}}}
+    object: {id: $game_id, completed_at: "now()", user_guesses: {data: {id: $guess_id, result_code: $result_code}, on_conflict: {update_columns: [result_code], constraint: user_guess_pkey}}}
     on_conflict: {constraint: user_game_pkey, update_columns: [updated_at, completed_at]}
   ) {
     id
@@ -1654,6 +1871,24 @@ export default {
       "name": "subscription_root"
     },
     "types": [
+      {
+        "kind": "OBJECT",
+        "name": "SignupOutput",
+        "fields": [
+          {
+            "name": "token",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          }
+        ],
+        "interfaces": []
+      },
       {
         "kind": "OBJECT",
         "name": "game",
@@ -2419,7 +2654,7 @@ export default {
             },
             "args": [
               {
-                "name": "id",
+                "name": "hash",
                 "type": {
                   "kind": "NON_NULL",
                   "ofType": {
@@ -2749,6 +2984,15 @@ export default {
                 }
               }
             ]
+          },
+          {
+            "name": "signup",
+            "type": {
+              "kind": "OBJECT",
+              "name": "SignupOutput",
+              "ofType": null
+            },
+            "args": []
           },
           {
             "name": "update_game",
@@ -3338,7 +3582,7 @@ export default {
             },
             "args": [
               {
-                "name": "id",
+                "name": "hash",
                 "type": {
                   "kind": "NON_NULL",
                   "ofType": {
@@ -3929,7 +4173,7 @@ export default {
             },
             "args": [
               {
-                "name": "id",
+                "name": "hash",
                 "type": {
                   "kind": "NON_NULL",
                   "ofType": {
@@ -4240,132 +4484,6 @@ export default {
         "name": "user",
         "fields": [
           {
-            "name": "all_guesses",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "LIST",
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "user_guess",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "args": [
-              {
-                "name": "distinct_on",
-                "type": {
-                  "kind": "LIST",
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "ofType": {
-                      "kind": "SCALAR",
-                      "name": "Any"
-                    }
-                  }
-                }
-              },
-              {
-                "name": "limit",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Any"
-                }
-              },
-              {
-                "name": "offset",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Any"
-                }
-              },
-              {
-                "name": "order_by",
-                "type": {
-                  "kind": "LIST",
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "ofType": {
-                      "kind": "SCALAR",
-                      "name": "Any"
-                    }
-                  }
-                }
-              },
-              {
-                "name": "where",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Any"
-                }
-              }
-            ]
-          },
-          {
-            "name": "all_guesses_aggregate",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "user_guess_aggregate",
-                "ofType": null
-              }
-            },
-            "args": [
-              {
-                "name": "distinct_on",
-                "type": {
-                  "kind": "LIST",
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "ofType": {
-                      "kind": "SCALAR",
-                      "name": "Any"
-                    }
-                  }
-                }
-              },
-              {
-                "name": "limit",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Any"
-                }
-              },
-              {
-                "name": "offset",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Any"
-                }
-              },
-              {
-                "name": "order_by",
-                "type": {
-                  "kind": "LIST",
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "ofType": {
-                      "kind": "SCALAR",
-                      "name": "Any"
-                    }
-                  }
-                }
-              },
-              {
-                "name": "where",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Any"
-                }
-              }
-            ]
-          },
-          {
             "name": "created_at",
             "type": {
               "kind": "NON_NULL",
@@ -4377,7 +4495,29 @@ export default {
             "args": []
           },
           {
-            "name": "games",
+            "name": "hash",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "updated_at",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "user_games",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4443,7 +4583,7 @@ export default {
             ]
           },
           {
-            "name": "games_aggregate",
+            "name": "user_games_aggregate",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4503,48 +4643,130 @@ export default {
             ]
           },
           {
-            "name": "id",
+            "name": "user_guesses",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
+                "kind": "LIST",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "user_guess",
+                    "ofType": null
+                  }
+                }
               }
             },
-            "args": []
+            "args": [
+              {
+                "name": "distinct_on",
+                "type": {
+                  "kind": "LIST",
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "Any"
+                    }
+                  }
+                }
+              },
+              {
+                "name": "limit",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Any"
+                }
+              },
+              {
+                "name": "offset",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Any"
+                }
+              },
+              {
+                "name": "order_by",
+                "type": {
+                  "kind": "LIST",
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "Any"
+                    }
+                  }
+                }
+              },
+              {
+                "name": "where",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Any"
+                }
+              }
+            ]
           },
           {
-            "name": "password",
+            "name": "user_guesses_aggregate",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
+                "kind": "OBJECT",
+                "name": "user_guess_aggregate",
+                "ofType": null
               }
             },
-            "args": []
-          },
-          {
-            "name": "updated_at",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
+            "args": [
+              {
+                "name": "distinct_on",
+                "type": {
+                  "kind": "LIST",
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "Any"
+                    }
+                  }
+                }
+              },
+              {
+                "name": "limit",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Any"
+                }
+              },
+              {
+                "name": "offset",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Any"
+                }
+              },
+              {
+                "name": "order_by",
+                "type": {
+                  "kind": "LIST",
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "Any"
+                    }
+                  }
+                }
+              },
+              {
+                "name": "where",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Any"
+                }
               }
-            },
-            "args": []
-          },
-          {
-            "name": "username",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
+            ]
           }
         ],
         "interfaces": []
@@ -4687,7 +4909,49 @@ export default {
             "args": []
           },
           {
-            "name": "guesses",
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "lost_at",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Any"
+            },
+            "args": []
+          },
+          {
+            "name": "updated_at",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Any"
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "user",
+            "type": {
+              "kind": "NON_NULL",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "user",
+                "ofType": null
+              }
+            },
+            "args": []
+          },
+          {
+            "name": "user_guesses",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4753,7 +5017,7 @@ export default {
             ]
           },
           {
-            "name": "guesses_aggregate",
+            "name": "user_guesses_aggregate",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -4813,49 +5077,7 @@ export default {
             ]
           },
           {
-            "name": "id",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "lost_at",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Any"
-            },
-            "args": []
-          },
-          {
-            "name": "updated_at",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Any"
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "user",
-            "type": {
-              "kind": "NON_NULL",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "user",
-                "ofType": null
-              }
-            },
-            "args": []
-          },
-          {
-            "name": "user_id",
+            "name": "user_hash",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5012,7 +5234,7 @@ export default {
             "args": []
           },
           {
-            "name": "user_id",
+            "name": "user_hash",
             "type": {
               "kind": "SCALAR",
               "name": "Any"
@@ -5075,7 +5297,7 @@ export default {
             "args": []
           },
           {
-            "name": "user_id",
+            "name": "user_hash",
             "type": {
               "kind": "SCALAR",
               "name": "Any"
@@ -5202,7 +5424,7 @@ export default {
             "args": []
           },
           {
-            "name": "user_id",
+            "name": "user_hash",
             "type": {
               "kind": "NON_NULL",
               "ofType": {
@@ -5335,7 +5557,7 @@ export default {
             "args": []
           },
           {
-            "name": "user_id",
+            "name": "user_hash",
             "type": {
               "kind": "SCALAR",
               "name": "Any"
@@ -5374,7 +5596,7 @@ export default {
             "args": []
           },
           {
-            "name": "user_id",
+            "name": "user_hash",
             "type": {
               "kind": "SCALAR",
               "name": "Any"
@@ -5433,15 +5655,7 @@ export default {
             "args": []
           },
           {
-            "name": "id",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Any"
-            },
-            "args": []
-          },
-          {
-            "name": "password",
+            "name": "hash",
             "type": {
               "kind": "SCALAR",
               "name": "Any"
@@ -5450,14 +5664,6 @@ export default {
           },
           {
             "name": "updated_at",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Any"
-            },
-            "args": []
-          },
-          {
-            "name": "username",
             "type": {
               "kind": "SCALAR",
               "name": "Any"
@@ -5480,15 +5686,7 @@ export default {
             "args": []
           },
           {
-            "name": "id",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Any"
-            },
-            "args": []
-          },
-          {
-            "name": "password",
+            "name": "hash",
             "type": {
               "kind": "SCALAR",
               "name": "Any"
@@ -5497,14 +5695,6 @@ export default {
           },
           {
             "name": "updated_at",
-            "type": {
-              "kind": "SCALAR",
-              "name": "Any"
-            },
-            "args": []
-          },
-          {
-            "name": "username",
             "type": {
               "kind": "SCALAR",
               "name": "Any"

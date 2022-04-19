@@ -1,0 +1,8 @@
+type Mutation {
+  signup: SignupOutput
+}
+
+type SignupOutput {
+  token: String!
+}
+

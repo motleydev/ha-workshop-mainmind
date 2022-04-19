@@ -1,0 +1,5 @@
+mutation CreateUser($hash: String) {
+  insert_user_one(object: { hash: $hash }) {
+    hash
+  }
+}

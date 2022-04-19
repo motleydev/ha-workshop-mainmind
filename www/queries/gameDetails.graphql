@@ -1,0 +1,10 @@
+subscription GameDetails($id: uuid!) {
+  user_game_by_pk(id: $id) {
+    lost_at
+    completed_at
+    user_guesses {
+      input_code
+      result_code
+    }
+  }
+}

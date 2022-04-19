@@ -3,16 +3,18 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { getClientIp } from "request-ip";
 import { fingerprint32 } from "farmhash";
 
-import { createClient } from "@urql/core";
-import { generateJWT } from "../_helpers/auth";
+import {
+  CreateUser,
+  CreateUserMutation,
+  CreateUserMutationVariables,
+} from "../../../generated/graphql";
 
-type Data = {
-  message?: number;
-};
+import { generateJWT } from "../_helpers/auth";
+import client from "../_helpers/client";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Data>
+  res: NextApiResponse
 ) {
   const ip = getClientIp(req)?.toString() || "";
   const userAgent = req.headers["user-agent"]?.toString() || "";
@@ -20,16 +22,28 @@ export default async function handler(
 
   const hash = fingerprint32(ip + userAgent + date).toString();
 
-  const token = generateJWT({
-    otherClaims: {
-      "X-Hasura-User-Id": hash,
-    },
-  });
+  try {
+    const userResult = await client
+      .mutation<CreateUserMutation, CreateUserMutationVariables>(CreateUser, {
+        hash,
+      })
+      .toPromise();
 
-  return res.json({
-    token,
-    name: user.name,
-    email: user.email,
-    refreshToken: user.refresh_token,
-  });
+    if (userResult.data) {
+      const token = generateJWT({
+        otherClaims: {
+          "X-Hasura-User-Id": hash,
+        },
+      });
+
+      return res.status(200).json({
+        token,
+      });
+    } else {
+      console.log(userResult.error);
+      return res.status(400).json({ mesage: "oops" });
+    }
+  } catch (e) {
+    console.log(e);
+  }
 }
