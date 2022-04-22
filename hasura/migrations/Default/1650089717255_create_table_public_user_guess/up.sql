@@ -1,1 +1,0 @@
-CREATE TABLE "public"."user_guess" ("id" serial NOT NULL, "created_at" timestamptz NOT NULL DEFAULT now(), "code" Integer[] NOT NULL, "user_id" uuid NOT NULL, "user_game_id" uuid NOT NULL, PRIMARY KEY ("id") , FOREIGN KEY ("user_game_id") REFERENCES "public"."user_game"("id") ON UPDATE restrict ON DELETE cascade);

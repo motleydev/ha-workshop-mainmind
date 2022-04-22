@@ -1,0 +1,15 @@
+query GetOriginalGameCode($id: uuid!) {
+  user_game_by_pk(id: $id) {
+    user_hash
+    user_guesses_aggregate {
+      aggregate {
+        count
+      }
+    }
+    game {
+      id
+      code_complexity
+      code
+    }
+  }
+}

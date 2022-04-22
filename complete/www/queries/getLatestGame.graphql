@@ -1,0 +1,7 @@
+query GetLatestGame {
+  game(limit: 1, order_by: { created_at: asc }) {
+    id
+    code_complexity
+    code_length
+  }
+}

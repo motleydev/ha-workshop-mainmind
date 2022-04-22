@@ -1,0 +1,9 @@
+mutation CreateGame($game_id: uuid!) {
+  insert_user_game_one(
+    object: { game_id: $game_id }
+    on_conflict: { constraint: user_game_pkey }
+  ) {
+    id
+    game_id
+  }
+}

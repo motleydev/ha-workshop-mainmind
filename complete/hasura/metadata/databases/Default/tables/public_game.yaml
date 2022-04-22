@@ -1,0 +1,30 @@
+table:
+  schema: public
+  name: game
+array_relationships:
+  - name: users
+    using:
+      foreign_key_constraint_on:
+        column: game_id
+        table:
+          schema: public
+          name: user_game
+select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+        - code_complexity
+        - code_length
+        - created_at
+        - game_config
+        - id
+      filter: {}
+  - role: player
+    permission:
+      columns:
+        - code_complexity
+        - code_length
+        - created_at
+        - game_config
+        - id
+      filter: {}
